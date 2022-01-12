@@ -49,11 +49,12 @@ import { PendingXHR } from 'pending-xhr-puppeteer'
 const browser = new Browser(
     {
         dataSave: new DataSave(),
-        puppeteerOptions: { headless: false },
+        puppeteerOptions: { headless: false }, // option for puppeteer
         maxPages = 10,
         maxBrowsers = 2,
         pageTimeout: 8000,
-        pageOptions: { waitUntil: 'networkidle2' },
+        freeResourcesTimer: 3600000, // this will calls onFreeResources every 5 hours
+        pageOptions: { waitUntil: 'networkidle2' },// option for puppeteer.page
         pageHandler: async (page, url) => {
             const u = URL.parse(url, true);
             var cssSelector = u.query["cssSelector"];
