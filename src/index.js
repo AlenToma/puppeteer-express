@@ -3,6 +3,13 @@ import uri from 'url';
 
 export class Browser {
   constructor(options) {
+    this.assignValue = (option, item) => {
+      Object.keys(option).forEach(x => {
+        item[x] = option[x]
+      });
+
+      return item;
+    }
     this.browsers = [];
     this.maxPages = 10;
     this.maxBrowsers = 2;
@@ -13,7 +20,6 @@ export class Browser {
     this.started = false;
     this.processing = new Map();
     this.pageTimeout = 8000;
-    this.refreshData = 3; // refresh data every 3 days.
     this.data = new Map();
     this.que = new Map();
     this.queEvents = undefined;
@@ -24,7 +30,7 @@ export class Browser {
     this.pageHandler = undefined;
     this.tempData = new Map();
     if (options)
-      Object.assign(this, options);
+        this.assignValue(options, this);
   }
 
   __dataLoaded(url, data) {
@@ -147,7 +153,7 @@ export class Browser {
     };
 
     if (this.puppeteerOptions)
-      options = Object.assign(options, this.puppeteerOptions);
+        options = this.assignValue(this.puppeteerOptions, options);
 
     var item = await nbrowser.launch(options);
     this.browsers.push(item);
@@ -264,7 +270,7 @@ export class Browser {
         timeout: this.pageTimeout
       }
       if (this.pageOptions)
-        Object.assign({}, this.pageOptions);
+         this.assignValue(this.pageOptions, options);
       page = await browser.newPage();
       await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36');
       await page.setJavaScriptEnabled(true);

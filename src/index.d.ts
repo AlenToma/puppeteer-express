@@ -3,7 +3,6 @@ import Puppeteer from 'puppeteer'
 export interface IOptions {
     maxPages?: number;
     maxBrowsers?: number;
-    refreshData?: number;
     freeResourcesTimer?: number;
     pageTimeout: number,
     dataSave?: IDataSave,

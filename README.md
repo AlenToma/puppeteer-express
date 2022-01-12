@@ -1,8 +1,8 @@
 # puppeteer-express
 puppeteer-express is library created to crawl html from websites.
 Depending on the settings you will be able to ajust the library to how much CPU and memory you have on the server.
-The library can handle infinit calls, it will create a que and execute those.
-The library is also able to cache and refresh those those calls depending on the settings.
+The library can handle infinit calls, it will create a que and execute those in order.
+The library is also able to cache and refresh those calls depending on the settings.
 
 # Getting started
 ```sh
@@ -10,9 +10,9 @@ npm install puppeteer-express
 ```
 # Basic
 ```js
-import Browser from 'puppeteer-express'
+import * as pExpress from 'puppeteer-express'
 // this will generate 2*10 calls at the sametimes
-const browser = new Browser({ maxPages:10, maxBrowsers: 10}); 
+const browser = new pExpress.Browser({ maxPages:10, maxBrowsers: 2}); 
 
 var html = await browser.addAsync("https://www.xxx.com");
 // OR
@@ -44,14 +44,14 @@ class DataSave {
 }
 
 
-import Browser from 'puppeteer-express'
+import * as pExpress from 'puppeteer-express'
 import { PendingXHR } from 'pending-xhr-puppeteer'
-const browser = new Browser(
+const browser = new pExpress.Browser(
     {
         dataSave: new DataSave(),
         puppeteerOptions: { headless: false }, // option for puppeteer
-        maxPages = 10,
-        maxBrowsers = 2,
+        maxPages: 10,
+        maxBrowsers: 2,
         pageTimeout: 8000,
         freeResourcesTimer: 3600000, // this will calls onFreeResources every 5 hours
         pageOptions: { waitUntil: 'networkidle2' },// option for puppeteer.page
