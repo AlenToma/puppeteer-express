@@ -15,7 +15,7 @@ export interface IOptions {
 }
 
 
-export interface IDate {
+export interface IData {
     url: string;
     data: string;
     date: Date,
@@ -25,8 +25,8 @@ export interface IDate {
 }
 
 export interface IDataSave {
-    getData: (url: string) => Promise<IDate | undefined>;
-    saveData: (data: IDate) => Promise<void>;
+    getData: (url: string) => Promise<IData | undefined>;
+    saveData: (data: IData) => Promise<void>;
     onFreeResources: (clearAll: boolean) => Promise<void>;
     delete: (url: string) => Promise<void>;
 }
