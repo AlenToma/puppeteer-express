@@ -1,6 +1,6 @@
 {
   "name": "puppeteer-express",
-  "version": "1.0.9",
+  "version": "1.1.1",
   "description": "puppeteer server",
   "author": "Alen Toma",
   "license": "MIT",
@@ -9,6 +9,7 @@
   "main": "dist/index.js",
   "module": "dist/index.modern.js",
   "source": "src/index.js",
+  "keywords": ["puppeteer", "express", "html scraper", "html", "nodejs", "puppeteer-express"],
   "engines": {
     "node": ">=10"
   },
