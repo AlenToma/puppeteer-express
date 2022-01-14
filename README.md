@@ -13,7 +13,7 @@ npm install puppeteer-express
 import * as pExpress from 'puppeteer-express'
 // this will generate 2*10 calls at the sametimes
 const browser = new pExpress.Browser({ maxPages:10, maxBrowsers: 2}); 
-
+browser.start();
 var html = await browser.addAsync("https://www.xxx.com");
 // OR
 browser.addSync("https://www.xxx.com", (html) => console.log(html));
@@ -75,6 +75,8 @@ const browser = new pExpress.Browser(
 
         }
     });
+
+browser.start();
 
 var html = await browser.addAsync("https://www.xxx.com");
 // OR
