@@ -76,7 +76,7 @@ const browser = new pExpress.Browser(
         }
     });
 
-browser.start();
+await browser.start();
 
 var html = await browser.addAsync("https://www.xxx.com");
 // OR
