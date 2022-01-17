@@ -10,6 +10,13 @@ export class Browser {
 
       return item;
     }
+
+    this.getUrl = (url) => {
+      if (typeof url === "string")
+        return url;
+      else return url.url;
+    }
+
     this.browsers = [];
     this.maxPages = 10;
     this.maxBrowsers = 2;
@@ -29,8 +36,9 @@ export class Browser {
     this.pageOptions = undefined;
     this.pageHandler = undefined;
     this.tempData = new Map();
+    this.uriParameters = new Map();
     if (options)
-        this.assignValue(options, this);
+      this.assignValue(options, this);
   }
 
   __dataLoaded(url, data) {
@@ -99,19 +107,24 @@ export class Browser {
 
   async __add(url, onload, __rec) {
     this.startTimer();
+    const parameters = typeof url === "string" ? undefined : url.parameters;
+    url = typeof url === "string" ? url : url.url;
     const data = await this.getData(url);
     if (data != undefined && data.data != undefined) {
-      var d = this.__dataLoaded(url, data);
-      return d;
+      return this.__dataLoaded(url, data);
     }
     if (__rec !== true) {
       if (this.que.has(url) !== true) {
-        this.que.set(url, onload ? [onload] : []);
+        {
+          this.que.set(url, onload ? [onload] : []);
+          if (parameters)
+            this.uriParameters.set(url, parameters);
+        }
       } else if (onload) {
-        this.que.get(url).push(onload)
+        this.que.get(url).push(onload);
       }
     }
-    await this.wait(30);
+    await this.wait(10);
     return await this.__add(url, onload, true);
   }
 
@@ -127,7 +140,8 @@ export class Browser {
           browser.close();
         }
       });
-
+      // clear all httpErrors
+      this.tempData.clear();
 
       this.browsers = this.browsers.filter(x => x.closed != true).sort((a, b) => {
         a.totalPages - b.totalPages;
@@ -153,7 +167,7 @@ export class Browser {
     };
 
     if (this.puppeteerOptions)
-        options = this.assignValue(this.puppeteerOptions, options);
+      options = this.assignValue(this.puppeteerOptions, options);
 
     var item = await nbrowser.launch(options);
     this.browsers.push(item);
@@ -207,21 +221,14 @@ export class Browser {
     const uurl = new uri.URL(url);
     if (content !== "") {
       if (this.dataSave)
-        this.dataSave.saveData({
-          data: content, date: new Date(), url: url, host: uurl.host, pathName: uurl.pathname, search: uurl.search
-        });
+        await this.dataSave.saveData({ data: content, date: new Date(), url: url, host: uurl.host, pathName: uurl.pathname, search: uurl.search, parameters: (this.uriParameters.has(url) ? this.uriParameters.get(url) : undefined) });
       else
-        this.data.set(url, {
-          data: content, date: new Date(), url: url, host: uurl.host, pathName: uurl.pathname, search: uurl.search
-        });
-
-    } else this.tempData.set(url, {
-      data: content, date: new Date(), url: url, host: uurl.host, pathName: uurl.pathname, search: uurl.search
-    });
+        this.data.set(url, { data: content, date: new Date(), url: url, host: uurl.host, pathName: uurl.pathname, search: uurl.search, parameters: (this.uriParameters.has(url) ? this.uriParameters.get(url) : undefined) });
+    } else this.tempData.set(url, { data: content, date: new Date(), url: url, host: uurl.host, pathName: uurl.pathname, search: uurl.search, parameters: (this.uriParameters.has(url) ? this.uriParameters.get(url) : undefined) });
+    this.uriParameters.delete(url)
   }
 
   async getData(url) {
-
     if (this.tempData.has(url))
       return this.tempData.get(url);
 
@@ -230,11 +237,10 @@ export class Browser {
   }
 
   async deleteData(url) {
-    console.log("delete data for", url);
     if (this.data.has(url))
       this.data.delete(url);
     if (this.dataSave)
-      this.dataSave.delete(url);
+      await this.dataSave.delete(url);
   }
 
   async getPageContent(url) {
@@ -245,7 +251,6 @@ export class Browser {
     this.processing.set(url, true);
     let page = undefined;
     let browser = undefined;
-    let pageTimeout = false;
     let cachedData = undefined;
     try {
       if ((cachedData = await this.getData(url)) !== undefined) {
@@ -270,7 +275,7 @@ export class Browser {
         timeout: this.pageTimeout
       }
       if (this.pageOptions)
-         this.assignValue(this.pageOptions, options);
+        this.assignValue(this.pageOptions, options);
       page = await browser.newPage();
       await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36');
       await page.setJavaScriptEnabled(true);
@@ -279,7 +284,7 @@ export class Browser {
       var response = await page.goto(url, options);
       if (response.status() !== 200) {
         await this.saveData(url, "");
-        throw "Https failed to get data. response status:" + response.status();
+        throw "Https failed to get data. response status:" + response.status() + " for URL:" + url;
       }
       if (this.pageHandler)
         await this.pageHandler(page, url);
@@ -295,15 +300,22 @@ export class Browser {
       }
       return "";
     } finally {
+
       if (page != undefined) {
-        if (!pageTimeout)
+        try {
           await page.close();
+        } catch (er) {
+          // ignore error, page has crashed
+        }
         browser.totalPages--;
         this.totalPages--;
       }
       this.processing.delete(url);
     }
   }
+
+
+
 }
 
 export default Browser;

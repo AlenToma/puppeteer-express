@@ -13,14 +13,21 @@ export interface IOptions {
     pageHandler: (page: Puppeteer.Page, url: string) => Promise<void>;
 }
 
-
 export interface IData {
     url: string;
     data: string;
     date: Date,
-    host: string,
-    pathName: string,
-    search: string
+    host?: string,
+    pathName?: string,
+    search?: string,
+    parameters?: any
+}
+
+export interface URI {
+    url: string,
+    // this is only a temp data that will be returned in getData.
+    // You may for example add IsRefreshable for the url. 
+    parameters: any
 }
 
 export interface IDataSave {
@@ -34,7 +41,7 @@ export class Browser {
     constructor(options?: IOptions);
     start: () => Promise<void>;
     stop: () => Promise<void>;
-    addSync: (url: string, onload: (html: string) => void | Promise<void>) => void;
-    addAsync: (url: string) => Promise<string>;
+    addSync: (url: string | URI, onload: (html: string) => void | Promise<void>) => void;
+    addAsync: (url: string | URI) => Promise<string>;
 }
 export default Browser;
